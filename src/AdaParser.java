@@ -108,8 +108,12 @@ public class AdaParser {
     }
 
     private void declaraciones() throws SyntaxException {
-        while (LA(1) == TokenType.IDENTIFIER || LA(1) == TokenType.PACKAGE_KW || LA(1) == TokenType.FUNCTION_KW || LA(1) == TokenType.BODY_KW || LA(1) == TokenType.PROTECTED_KW || LA(1) == TokenType.RECORD_KW || LA(1) == TokenType.TASK_KW || LA(1) == TokenType.SUBTYPE_KW) {
-            if (LA(1) == TokenType.PACKAGE_KW) {
+        while (true) {
+            if (LA(1) == TokenType.IDENTIFIER && LA(2) == TokenType.COLON) {
+                declaracionVariable();
+            } else if (LA(1) == TokenType.TYPE_KW || LA(1) == TokenType.ABSTRACT_KW || LA(1) == TokenType.TAGGED_KW || LA(1) == TokenType.LIMITED_KW || LA(1) == TokenType.PRIVATE_KW) {
+                declaracionTipo();
+            } else if (LA(1) == TokenType.PACKAGE_KW) {
                 declaracionPaquete();
             } else if (LA(1) == TokenType.FUNCTION_KW) {
                 declaracionFuncion();
@@ -124,7 +128,7 @@ public class AdaParser {
             } else if (LA(1) == TokenType.SUBTYPE_KW) {
                 declaracionSubtype();
             } else {
-                declaracionVariable();
+                break;
             }
         }
     }
@@ -135,15 +139,12 @@ public class AdaParser {
         }
     }
 
+    // Este es el método 'enunciado' que debe reemplazar al que ya tienes
     private void enunciado() throws SyntaxException {
         switch (LA(1)) {
             case IDENTIFIER:
-                // Usamos Lookahead para decidir si es asignación o llamada
-                if (LA(2) == TokenType.ASSIGNMENT_OP) {
-                    asignacion();
-                } else {
-                    llamadaProcedimiento();
-                }
+                // Procesa una expresión que puede ser una asignación o una llamada a un procedimiento
+                expresionOAsignacion();
                 break;
             case IF_KW:
                 sentenciaSi();
@@ -190,17 +191,21 @@ public class AdaParser {
         }
     }
 
-    private void asignacion() throws SyntaxException {
-        // La asignación puede tener una expresion compleja a la izquierda
+    // Este es el nuevo método 'expresionOAsignacion' que resuelve el problema
+    private void expresionOAsignacion() throws SyntaxException {
+        // Procesa la expresión completa a la izquierda del ':='
         expresion();
-        match(TokenType.ASSIGNMENT_OP);
-        expresion();
-        match(TokenType.SEMICOLON);
-    }
 
-    private void llamadaProcedimiento() throws SyntaxException {
-        expresion();
-        match(TokenType.SEMICOLON);
+        // Si la expresión es seguida por ':=', es una asignación
+        if (LA(1) == TokenType.ASSIGNMENT_OP) {
+            match(TokenType.ASSIGNMENT_OP);
+            expresion();
+            match(TokenType.SEMICOLON);
+        }
+        // Si no hay ':=', asume que es una llamada a un procedimiento y espera el ';'
+        else {
+            match(TokenType.SEMICOLON);
+        }
     }
 
     private void declaracionVariable() throws SyntaxException {
@@ -231,7 +236,6 @@ public class AdaParser {
         }
     }
 
-    // <Expresion> -> <Termino> ( (AND_KW | OR_KW | XOR_KW) <Termino> )*
     private void expresion() throws SyntaxException {
         termino();
         while (LA(1) == TokenType.AND_KW || LA(1) == TokenType.OR_KW || LA(1) == TokenType.XOR_KW) {
@@ -240,7 +244,6 @@ public class AdaParser {
         }
     }
 
-    // <Termino> -> <Factor> ( (PLUS_OP | MINUS_OP | CONCATENATION_OP) <Factor> )*
     private void termino() throws SyntaxException {
         factor();
         while (LA(1) == TokenType.PLUS_OP || LA(1) == TokenType.MINUS_OP || LA(1) == TokenType.CONCATENATION_OP) {
@@ -249,48 +252,62 @@ public class AdaParser {
         }
     }
 
-    // <Factor> -> <Literal> | <Primario> | ( <Expresion> )
     private void factor() throws SyntaxException {
         TokenType currentType = LA(1);
         if (currentType == TokenType.INTEGER_LITERAL ||
                 currentType == TokenType.REAL_LITERAL ||
                 currentType == TokenType.STRING_LITERAL) {
             literal();
-        } else if (currentType == TokenType.IDENTIFIER) {
+        } else if (currentType == TokenType.IDENTIFIER || currentType == TokenType.NEW_KW || currentType == TokenType.ABS_KW) {
             primario();
         } else if (currentType == TokenType.PAREN_LEFT) {
             match(TokenType.PAREN_LEFT);
             expresion();
             match(TokenType.PAREN_RIGHT);
         } else {
-            throw new SyntaxException("Se esperaba un literal, identificador o expresión entre paréntesis en la línea " + LT(1).line + ", columna " + LT(1).column);
+            throw new SyntaxException("Se esperaba un literal, identificador, 'new', 'abs' o expresión entre paréntesis en la línea " + LT(1).line + ", columna " + LT(1).column);
         }
     }
 
     private void primario() throws SyntaxException {
-        match(TokenType.IDENTIFIER);
-        while (true) {
-            if (LA(1) == TokenType.DOT) {
-                match(TokenType.DOT);
-                match(TokenType.IDENTIFIER);
-            } else if (LA(1) == TokenType.ATTRIBUTE_OP) {
+        if (LA(1) == TokenType.NEW_KW) {
+            match(TokenType.NEW_KW);
+
+            // El tipo de dato que sigue a 'new'
+            match(TokenType.IDENTIFIER);
+
+            // Manejar el caso del calificador de tipo o agregado '()'
+            if (LA(1) == TokenType.ATTRIBUTE_OP) {
                 match(TokenType.ATTRIBUTE_OP);
-                match(TokenType.IDENTIFIER);
-                if (LA(1) == TokenType.PAREN_LEFT) {
+                match(TokenType.PAREN_LEFT);
+                listaParametros(); // O la expresión simple
+                match(TokenType.PAREN_RIGHT);
+            }
+
+        } else if (LA(1) == TokenType.ABS_KW) {
+            match(TokenType.ABS_KW);
+            factor();
+        } else {
+            match(TokenType.IDENTIFIER);
+            while (true) {
+                if (LA(1) == TokenType.DOT) {
+                    match(TokenType.DOT);
+                    match(TokenType.IDENTIFIER);
+                } else if (LA(1) == TokenType.ATTRIBUTE_OP) {
+                    match(TokenType.ATTRIBUTE_OP);
+                    match(TokenType.IDENTIFIER);
+                    if (LA(1) == TokenType.PAREN_LEFT) {
+                        match(TokenType.PAREN_LEFT);
+                        listaParametros();
+                        match(TokenType.PAREN_RIGHT);
+                    }
+                } else if (LA(1) == TokenType.PAREN_LEFT) {
                     match(TokenType.PAREN_LEFT);
                     listaParametros();
                     match(TokenType.PAREN_RIGHT);
-                }
-            } else if (LA(1) == TokenType.PAREN_LEFT) {
-                match(TokenType.PAREN_LEFT);
-                if (LA(2) == TokenType.PAREN_RIGHT) { // Maneja el caso de ()
-                    listaParametros();
                 } else {
-                    expresion();
+                    break;
                 }
-                match(TokenType.PAREN_RIGHT);
-            } else {
-                break;
             }
         }
     }
@@ -518,6 +535,125 @@ public class AdaParser {
         match(TokenType.IS_KW);
         match(TokenType.IDENTIFIER);
         match(TokenType.SEMICOLON);
+    }
+
+    private void declaracionTipo() throws SyntaxException {
+        match(TokenType.TYPE_KW);
+
+        // Manejar calificadores opcionales antes del identificador
+        // Aunque la sintaxis lo permite, 'limited private' es más común después de 'is'
+        if (LA(1) == TokenType.LIMITED_KW) {
+            match(TokenType.LIMITED_KW);
+        }
+        if (LA(1) == TokenType.PRIVATE_KW) {
+            match(TokenType.PRIVATE_KW);
+        }
+
+        match(TokenType.IDENTIFIER); // Nombre del nuevo tipo
+        match(TokenType.IS_KW);
+
+        // Manejar calificadores después de 'is' pero antes de la definición del tipo
+        if (LA(1) == TokenType.ABSTRACT_KW) {
+            match(TokenType.ABSTRACT_KW);
+        }
+        if (LA(1) == TokenType.TAGGED_KW) {
+            match(TokenType.TAGGED_KW);
+        }
+
+        // --- Lógica Corregida para las diferentes definiciones de tipo ---
+
+        // Caso 1: Manejar el tipo privado como una definición independiente
+        if (LA(1) == TokenType.LIMITED_KW || LA(1) == TokenType.PRIVATE_KW) {
+            if (LA(1) == TokenType.LIMITED_KW) {
+                match(TokenType.LIMITED_KW);
+            }
+            match(TokenType.PRIVATE_KW);
+        }
+
+        // Caso 2: El resto de definiciones de tipo
+        else if (LA(1) == TokenType.ACCESS_KW) {
+            declaracionTipoAcceso();
+        } else if (LA(1) == TokenType.ARRAY_KW) {
+            declaracionArray();
+        } else if (LA(1) == TokenType.DIGITS_KW || LA(1) == TokenType.DELTA_KW) {
+            declaracionTipoReal();
+        } else if (LA(1) == TokenType.RECORD_KW) {
+            declaracionRecord();
+        } else if (LA(1) == TokenType.NULL_KW) {
+            match(TokenType.NULL_KW);
+            if (LA(1) == TokenType.RECORD_KW) {
+                match(TokenType.RECORD_KW);
+            }
+        } else if (LA(1) == TokenType.IDENTIFIER) {
+            // Manejar subtipos o tipos derivados
+            match(TokenType.IDENTIFIER);
+        } else {
+            throw new SyntaxException("Se esperaba una definición de tipo válida después de 'is' en la línea " + LT(1).line + ", columna " + LT(1).column);
+        }
+
+        match(TokenType.SEMICOLON);
+    }
+
+    private void declaracionTipoAcceso() throws SyntaxException {
+        match(TokenType.ACCESS_KW);
+
+        if (LA(1) == TokenType.ALL_KW) {
+            match(TokenType.ALL_KW);
+        }
+
+        match(TokenType.IDENTIFIER);
+    }
+
+    private void declaracionArray() throws SyntaxException {
+        match(TokenType.ARRAY_KW);
+        match(TokenType.PAREN_LEFT);
+        listaRangos();
+        match(TokenType.PAREN_RIGHT);
+        match(TokenType.OF_KW);
+        expresion();
+    }
+
+    private void listaRangos() throws SyntaxException {
+        // Procesa el primer rango
+        expresion();
+        if (LA(1) == TokenType.RANGE_OP) {
+            match(TokenType.RANGE_OP);
+            expresion();
+        }
+
+        // Procesa rangos adicionales si hay comas
+        while (LA(1) == TokenType.COMMA) {
+            match(TokenType.COMMA);
+            expresion();
+            match(TokenType.RANGE_OP);
+            expresion();
+        }
+    }
+
+    private void declaracionTipoReal() throws SyntaxException {
+        if (LA(1) == TokenType.DIGITS_KW) {
+            match(TokenType.DIGITS_KW);
+            expresion();
+            if (LA(1) == TokenType.RANGE_KW) {
+                match(TokenType.RANGE_KW);
+                expresion();
+                match(TokenType.RANGE_OP);
+                expresion();
+            }
+        } else if (LA(1) == TokenType.DELTA_KW) {
+            match(TokenType.DELTA_KW);
+            expresion();
+            if (LA(1) == TokenType.DIGITS_KW) {
+                match(TokenType.DIGITS_KW);
+                expresion();
+            }
+            if (LA(1) == TokenType.RANGE_KW) {
+                match(TokenType.RANGE_KW);
+                expresion();
+                match(TokenType.RANGE_OP);
+                expresion();
+            }
+        }
     }
 
     private void condicion() throws SyntaxException {
