@@ -246,26 +246,34 @@ public class AdaParser {
 
     private void termino() throws SyntaxException {
         factor();
-        while (LA(1) == TokenType.PLUS_OP || LA(1) == TokenType.MINUS_OP || LA(1) == TokenType.CONCATENATION_OP) {
+        while (LA(1) == TokenType.PLUS_OP || LA(1) == TokenType.MINUS_OP || LA(1) == TokenType.CONCATENATION_OP || LA(1) == TokenType.MOD_KW || LA(1) == TokenType.REM_KW) {
             consume();
             factor();
         }
     }
 
     private void factor() throws SyntaxException {
-        TokenType currentType = LA(1);
-        if (currentType == TokenType.INTEGER_LITERAL ||
-                currentType == TokenType.REAL_LITERAL ||
-                currentType == TokenType.STRING_LITERAL) {
-            literal();
-        } else if (currentType == TokenType.IDENTIFIER || currentType == TokenType.NEW_KW || currentType == TokenType.ABS_KW) {
-            primario();
-        } else if (currentType == TokenType.PAREN_LEFT) {
-            match(TokenType.PAREN_LEFT);
-            expresion();
-            match(TokenType.PAREN_RIGHT);
+        if (LA(1) == TokenType.ABS_KW || LA(1) == TokenType.NOT_KW) {
+            consume();
+            factor(); // Llamada recursiva para manejar expresiones como 'not not A' o 'abs(abs(A))'
+        } else if (LA(1) == TokenType.MINUS_OP) { // Maneja el operador unario negativo
+            consume();
+            factor();
         } else {
-            throw new SyntaxException("Se esperaba un literal, identificador, 'new', 'abs' o expresión entre paréntesis en la línea " + LT(1).line + ", columna " + LT(1).column);
+            TokenType currentType = LA(1);
+            if (currentType == TokenType.INTEGER_LITERAL ||
+                    currentType == TokenType.REAL_LITERAL ||
+                    currentType == TokenType.STRING_LITERAL) {
+                literal();
+            } else if (currentType == TokenType.IDENTIFIER || currentType == TokenType.NEW_KW) {
+                primario();
+            } else if (currentType == TokenType.PAREN_LEFT) {
+                match(TokenType.PAREN_LEFT);
+                expresion();
+                match(TokenType.PAREN_RIGHT);
+            } else {
+                throw new SyntaxException("Se esperaba un literal, identificador, 'new', 'abs', 'not' o 'resta unaria' o expresión entre paréntesis en la línea " + LT(1).line + ", columna " + LT(1).column);
+            }
         }
     }
 
@@ -657,14 +665,17 @@ public class AdaParser {
     }
 
     private void condicion() throws SyntaxException {
-        if (LA(1) == TokenType.PAREN_LEFT) {
-            match(TokenType.PAREN_LEFT);
-            expresion();
-            operadorRelacional();
-            expresion();
-            match(TokenType.PAREN_RIGHT);
-        } else {
-            expresion();
+        expresion(); // Procesa la primera parte de la expresión
+
+        // Si la expresión es seguida por un operador relacional,
+        // procesa la segunda expresión.
+        if (LA(1) == TokenType.LESS_THAN ||
+                LA(1) == TokenType.GREATER_THAN ||
+                LA(1) == TokenType.LESS_EQUAL_OP ||
+                LA(1) == TokenType.GREATER_EQUAL_OP ||
+                LA(1) == TokenType.EQUALITY_OP ||
+                LA(1) == TokenType.DIFFERENCE_OP) {
+
             operadorRelacional();
             expresion();
         }
