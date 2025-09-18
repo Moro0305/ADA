@@ -1,0 +1,35 @@
+with Ada.Text_IO;
+procedure Hello_World is
+   Message : constant String := "Hello, World!";
+   Numero : Integer := 10_000;
+   Contador : Integer := 3;
+begin
+   Ada.Text_IO.Put_Line (Message);
+
+   -- Ejemplo de bucle For
+   Ada.Text_IO.Put_Line ("--- Bucle For ---");
+   for I in 1..5 loop
+      Ada.Text_IO.Put ("Iteracion: ");
+      Ada.Text_IO.Put_Line (Integer'Image(I));
+   end loop;
+
+   -- Ejemplo de bucle While
+   Ada.Text_IO.Put_Line ("--- Bucle While ---");
+   while Contador > 0 loop
+      Ada.Text_IO.Put_Line ("Cuenta regresiva: " & Integer'Image(Contador));
+      Contador := Contador - 1;
+   end loop;
+
+   -- Ejemplo de bucle Loop
+   Ada.Text_IO.Put_Line ("--- Bucle Loop ---");
+   loop
+      Ada.Text_IO.Put_Line ("Dentro del bucle sin condicion");
+      exit when (25 > 10);
+   end loop;
+
+   -- Este es un comentario
+   if (25 > 10) then
+      null;
+   end if;
+
+end Hello_World;
