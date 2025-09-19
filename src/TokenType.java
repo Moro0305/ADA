@@ -29,6 +29,7 @@ public enum TokenType {
     ATTRIBUTE_OP,       // '
     CONCATENATION_OP,   // &
 
+    BASE_LITERAL,       // #
     DOUBLE_ARROW,       // =>
     PAREN_LEFT,         // (
     PAREN_RIGHT,        // )

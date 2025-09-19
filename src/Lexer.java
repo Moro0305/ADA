@@ -1,9 +1,11 @@
-public abstract class Lexer {
-    public static final char EOF = (char) -1; // Representa el final del archivo
+// Archivo: Lexer.java
 
-    String input;
-    int p = 0;
-    char c;
+public abstract class Lexer {
+    public static final char EOF = (char) -1;
+
+    protected String input; // Ahora es protected
+    protected int p = 0;    // Ahora es protected
+    protected char c;       // Ahora es protected
 
     public Lexer(String input) {
         this.input = input;

@@ -52,37 +52,25 @@ public class AdaParserTest {
     }
 
     private static String getHardcodedAdaCode() {
-        return "with Ada.Text_IO;\n" +
-                "procedure Hello_World is\n" +
-                "   Message : constant String := \"Hello, World!\";\n" +
-                "   Numero : Integer := 10_000;\n" +
-                "   Contador : Integer := 3;\n" +
-                "begin\n" +
-                "   Ada.Text_IO.Put_Line (Message);\n" +
-                "   -- Ejemplo de bucle For\n" +
-                "   Ada.Text_IO.Put_Line (\"--- Bucle For ---\");\n" +
-                "   for I in 1..5 loop\n" +
-                "      Ada.Text_IO.Put (\"Iteracion: \");\n" +
-                "      -- Se ha modificado esta linea para evitar el atributo 'Image\n" +
-                "      Ada.Text_IO.Put_Line (\"\" ); -- Imprimimos una cadena vacia en su lugar\n" +
-                "   end loop;\n" +
-                "   -- Ejemplo de bucle While\n" +
-                "   Ada.Text_IO.Put_Line (\"--- Bucle While ---\");\n" +
-                "   while Contador > 0 loop\n" +
-                "      -- Se ha modificado esta linea para evitar la concatenacion y el atributo 'Image\n" +
-                "      Ada.Text_IO.Put_Line (\"Cuenta regresiva: \");\n" +
-                "      Contador := Contador - 1;\n" +
-                "   end loop;\n" +
-                "   -- Ejemplo de bucle Loop\n" +
-                "   Ada.Text_IO.Put_Line (\"--- Bucle Loop ---\");\n" +
-                "   loop\n" +
-                "      Ada.Text_IO.Put_Line (\"Dentro del bucle sin condicion\");\n" +
-                "      exit when (25 > 10);\n" +
-                "   end loop;\n" +
-                "   -- Este es un comentario\n" +
-                "   if (25 > 10) then\n" +
-                "      null;\n" +
-                "   end if;\n" +
-                "end Hello_World;";
+        return
+                "with Ada.Text_IO;\n" +
+                        "with Ada.Integer_Text_IO;\n" +
+                        "\n" +
+                        "procedure Ejemplo_Operacion is\n" +
+                        "   -- Declaración de variables\n" +
+                        "   Numero_Uno   : Integer := 10;\n" +
+                        "   Numero_Dos   : Integer := 5;\n" +
+                        "   Suma_Total   : Integer;\n" +
+                        "\n" +
+                        "begin\n" +
+                        "   -- Operación de suma\n" +
+                        "   Suma_Total := Numero_Uno + Numero_Dos;\n" +
+                        "\n" +
+                        "   -- Impresión del resultado\n" +
+                        "   Ada.Text_IO.Put(\"La suma es: \");\n" +
+                        "   Ada.Integer_Text_IO.Put(Suma_Total);\n" +
+                        "   Ada.Text_IO.New_Line;\n" +
+                        "\n" +
+                        "end Ejemplo_Operacion;";
     }
 }
