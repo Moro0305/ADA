@@ -1,35 +1,58 @@
-with Ada.Text_IO;
-procedure Hello_World is
-   Message : constant String := "Hello, World!";
-   Numero : Integer := 10_000;
-   Contador : Integer := 3;
+with Ada.Text_IO;         use Ada.Text_IO;
+with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
+
+procedure Ejemplo_Bucles is
+   -- Declaración de variables
+   Contador     : Integer := 10;
+   Encontrado   : Boolean := False;
+   Numero_Buscado: Integer := 3;
 begin
-   Ada.Text_IO.Put_Line (Message);
 
-   -- Ejemplo de bucle For
-   Ada.Text_IO.Put_Line ("--- Bucle For ---");
-   for I in 1..5 loop
-      Ada.Text_IO.Put ("Iteracion: ");
-      Ada.Text_IO.Put_Line (Integer'Image(I));
+   -- Bucle FOR: Cuenta regresiva de 10 a 1
+   Put_Line("--- Bucle FOR: Cuenta regresiva ---");
+   for I in reverse 1..10 loop
+      Put(I);
+      Put(" ");
    end loop;
+   New_Line;
 
-   -- Ejemplo de bucle While
-   Ada.Text_IO.Put_Line ("--- Bucle While ---");
-   while Contador > 0 loop
-      Ada.Text_IO.Put_Line ("Cuenta regresiva: " & Integer'Image(Contador));
+   ---
+
+   -- Bucle WHILE: Busca un número
+   Put_Line("--- Bucle WHILE: Buscando el numero 3 ---");
+   while (Contador >= 1) and (not Encontrado) loop
+      Put("Buscando en: ");
+      Put(Contador);
+      New_Line;
+      
+      if Contador = Numero_Buscado then
+         Encontrado := True;
+      end if;
+      
       Contador := Contador - 1;
    end loop;
-
-   -- Ejemplo de bucle Loop
-   Ada.Text_IO.Put_Line ("--- Bucle Loop ---");
-   loop
-      Ada.Text_IO.Put_Line ("Dentro del bucle sin condicion");
-      exit when (25 > 10);
-   end loop;
-
-   -- Este es un comentario
-   if (25 > 10) then
-      null;
+   
+   if Encontrado then
+      Put_Line("¡Número encontrado!");
+   else
+      Put_Line("Número no encontrado.");
    end if;
 
-end Hello_World;
+   ---
+   
+   -- Bucle LOOP: Bucle simple que se ejecuta hasta que la condición se cumple
+   Put_Line("--- Bucle LOOP: Tarea simple ---");
+   Contador := 1;
+   loop
+      Put("Iteracion: ");
+      Put(Contador);
+      New_Line;
+      
+      exit when (Contador = 5) or (Encontrado = True);
+      
+      Contador := Contador + 1;
+   end loop;
+   
+   Put_Line("Fin del programa.");
+
+end Ejemplo_Bucles;
