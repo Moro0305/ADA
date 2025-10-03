@@ -1,4 +1,13 @@
+/**
+ * Test class for AdaLexer.
+ * Demonstrates tokenization of Ada source code and prints each token.
+ */
 public class AdaLexerTest {
+    /**
+     * Main method to run the AdaLexer test.
+     * Tokenizes a sample Ada program and prints all tokens to the console.
+     * @param args Command-line arguments (not used)
+     */
     public static void main(String[] args) {
         String codigoAda =
                 "with Ada.Text_IO;\n" +
@@ -11,7 +20,7 @@ public class AdaLexerTest {
                         "   -- Ejemplo de bucle For\n" +
                         "   Ada.Text_IO.Put_Line (\"--- Bucle For ---\");\n" +
                         "   for I in 1..5 loop\n" +
-                        "      Ada.Text_IO.Put (\"Iteracion: \");\n" +
+                        "      Ada.Text_IO.Put (\"Iteracion: \" );\n" +
                         "      Ada.Text_IO.Put_Line (Integer'Image(I));\n" +
                         "   end loop;\n" +
                         "   -- Ejemplo de bucle While\n" +
@@ -35,9 +44,9 @@ public class AdaLexerTest {
         AdaLexer lexer = new AdaLexer(codigoAda);
         Token t = lexer.nextToken();
         while (t.type != TokenType.EOF) {
-            System.out.println(t);
+            System.out.println(t); // Print each token
             t = lexer.nextToken();
         }
-        System.out.println(t); // Imprime el token EOF
+        System.out.println(t); // Print the EOF token
     }
 }

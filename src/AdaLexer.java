@@ -1,20 +1,31 @@
+/**
+ * AdaLexer is a lexical analyzer for Ada source code.
+ * It tokenizes the input string and provides utilities for parsing Ada syntax.
+ * Extends the base Lexer class and adds Ada-specific logic.
+ */
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Arrays;
 
 public class AdaLexer extends Lexer {
-
-    // Variables de la clase base, declaradas aquí para evitar el error de "cannot resolve symbol".
-    // Idealmente, deberían ser protegidas en la clase Lexer.
+    /** Input string to tokenize */
     protected String input;
+    /** Current position in the input string */
     protected int position = 0;
+    /** Current character being analyzed */
     protected char c;
+    /** End-of-file character constant */
     protected final char EOF = (char)-1;
-
-    // Nuevos contadores para línea y columna
+    /** Current line number for error reporting */
     protected int line = 1;
+    /** Current column number for error reporting */
     protected int column = 1;
 
+    /**
+     * Constructs an AdaLexer with the given input string.
+     * Initializes the current character and position.
+     * @param input Ada source code to tokenize
+     */
     public AdaLexer(String input) {
         super(input);
         this.input = input;
@@ -25,18 +36,22 @@ public class AdaLexer extends Lexer {
         }
     }
 
+    /** Returns true if the current character is a letter. */
     private boolean isLetter() {
         return Character.isLetter(c);
     }
 
+    /** Returns true if the current character is a digit. */
     private boolean isDigit() {
         return Character.isDigit(c);
     }
 
+    /** Returns true if the current character is whitespace. */
     private boolean isWhitespace() {
         return Character.isWhitespace(c);
     }
 
+    /** Peeks at the next character in the input without consuming it. */
     private char peek() {
         if (position + 1 >= input.length()) {
             return EOF;
@@ -44,16 +59,19 @@ public class AdaLexer extends Lexer {
         return input.charAt(position + 1);
     }
 
+    /** Returns true if the end of input has been reached. */
     private boolean isEOF() {
         return position >= input.length();
     }
 
+    /** Consumes whitespace characters. */
     private void ws() {
         while (isWhitespace()) {
             consume();
         }
     }
 
+    /** Consumes Ada-style comments (starting with --). */
     private void comment() {
         if (c == '-') {
             consume();
@@ -65,6 +83,12 @@ public class AdaLexer extends Lexer {
         }
     }
 
+    /**
+     * Identifies reserved words or identifiers in the Ada source code.
+     * Consumes characters until a delimiter is found.
+     * Checks the consumed characters against known Ada reserved words.
+     * @return Token representing the reserved word or identifier
+     */
     private Token identifierOrReservedWord() {
         int startLine = line;
         int startColumn = column;
@@ -153,6 +177,11 @@ public class AdaLexer extends Lexer {
         }
     }
 
+    /**
+     * Parses number literals (integers and reals) in the Ada source code.
+     * Consumes digits, optional decimal points, and exponent parts.
+     * @return Token representing the number literal
+     */
     private Token numberLiteral() {
         int startLine = line;
         int startColumn = column;
@@ -209,6 +238,11 @@ public class AdaLexer extends Lexer {
         }
     }
 
+    /**
+     * Parses string literals in the Ada source code.
+     * Consumes characters until a closing quote is found.
+     * @return Token representing the string literal
+     */
     private Token stringLiteral() {
         int startLine = line;
         int startColumn = column;
@@ -245,6 +279,12 @@ public class AdaLexer extends Lexer {
         }
     }
 
+    /**
+     * Retrieves the next token from the input.
+     * Skips whitespace and comments, and identifies tokens for keywords,
+     * identifiers, literals, and operators.
+     * @return The next token in the input
+     */
     @Override
     public Token nextToken() {
         while (c != EOF) {
@@ -329,6 +369,11 @@ public class AdaLexer extends Lexer {
         return new Token(TokenType.EOF, "<EOF>", line, column);
     }
 
+    /**
+     * Parses attribute references in the Ada source code.
+     * Consumes characters following an apostrophe until a delimiter is found.
+     * @return Token representing the attribute reference
+     */
     private Token attribute() {
         int startLine = line;
         int startColumn = column;

@@ -1,15 +1,25 @@
+/**
+ * AdaParser parses Ada source code tokens and builds the program structure.
+ * Supports nested symbol tables for scope management and semantic checks.
+ */
 import java.util.ArrayList;
 
 public class AdaParser {
-
+    /** List of tokens to parse */
     private ArrayList<Token> tokens;
+    /** Current token index in the token list */
     private int tokenIndex = 0;
-
+    /** Lookahead buffer for predictive parsing */
     private static final int LOOKAHEAD_K = 4;
     private final Token[] lookaheadBuffer = new Token[LOOKAHEAD_K];
+    /** Symbol table for managing scopes and declarations */
+    private SymbolTable symbolTable;
 
-    private SymbolTable symbolTable; // Symbol table for nested scopes
-
+    /**
+     * Constructs an AdaParser with the given tokens.
+     * Initializes the lookahead buffer and symbol table.
+     * @param tokens List of tokens to parse
+     */
     public AdaParser(ArrayList<Token> tokens) {
         this.tokens = tokens;
         this.symbolTable = new SymbolTable(); // Initialize symbol table
@@ -22,6 +32,11 @@ public class AdaParser {
         }
     }
 
+    /**
+     * Returns the type of the k-th lookahead token.
+     * @param k Lookahead position (1-based)
+     * @return TokenType of the k-th lookahead token
+     */
     public TokenType LA(int k) {
         if (k > LOOKAHEAD_K || tokenIndex + k - 1 >= tokens.size()) {
             return TokenType.EOF;
@@ -29,6 +44,11 @@ public class AdaParser {
         return lookaheadBuffer[k - 1].type;
     }
 
+    /**
+     * Returns the k-th lookahead token.
+     * @param k Lookahead position (1-based)
+     * @return Token object at the k-th lookahead position
+     */
     public Token LT(int k) {
         if (k > LOOKAHEAD_K || tokenIndex + k - 1 >= tokens.size()) {
             return new Token(TokenType.EOF, "<EOF>", 0, 0);
@@ -36,6 +56,9 @@ public class AdaParser {
         return lookaheadBuffer[k - 1];
     }
 
+    /**
+     * Consumes the current token and advances the lookahead buffer.
+     */
     private void consume() {
         tokenIndex++;
         for (int i = 0; i < LOOKAHEAD_K - 1; i++) {
@@ -48,6 +71,9 @@ public class AdaParser {
         }
     }
 
+    /**
+     * Entry point for parsing. Throws SyntaxException if syntax is invalid.
+     */
     public void analizar() throws SyntaxException {
         programa();
         if (LA(1) != TokenType.EOF) {
@@ -56,6 +82,11 @@ public class AdaParser {
         System.out.println("La sintaxis del programa es correcta. ✅");
     }
 
+    /**
+     * Matches the expected token type, throws SyntaxException if not matched.
+     * @param expectedType Expected TokenType to match
+     * @throws SyntaxException if the next token does not match expectedType
+     */
     private void match(TokenType expectedType) throws SyntaxException {
         if (LA(1) != expectedType) {
 
