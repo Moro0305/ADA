@@ -8,8 +8,11 @@ public class AdaParser {
     private static final int LOOKAHEAD_K = 4;
     private final Token[] lookaheadBuffer = new Token[LOOKAHEAD_K];
 
+    private SymbolTable symbolTable; // Symbol table for nested scopes
+
     public AdaParser(ArrayList<Token> tokens) {
         this.tokens = tokens;
+        this.symbolTable = new SymbolTable(); // Initialize symbol table
         for (int i = 0; i < LOOKAHEAD_K; i++) {
             if (i < tokens.size()) {
                 lookaheadBuffer[i] = tokens.get(i);
@@ -334,6 +337,7 @@ public class AdaParser {
     }
 
     private void declaracionVariable() throws SyntaxException {
+        Token varName = LT(1);
         match(TokenType.IDENTIFIER);
         match(TokenType.COLON);
 
@@ -341,8 +345,10 @@ public class AdaParser {
             match(TokenType.CONSTANT_KW);
         }
 
-        // Now, we expect the type of the variable, which is an identifier.
+        Token typeName = LT(1);
         match(TokenType.IDENTIFIER);
+        // Register variable in symbol table
+        symbolTable.addSymbol(new Symbol(varName.text, "variable", typeName.text));
 
         if (LA(1) == TokenType.AT_KW) {
             match(TokenType.AT_KW);
@@ -901,44 +907,61 @@ public class AdaParser {
 
     private void declaracionProcedimiento() throws SyntaxException {
         match(TokenType.PROCEDURE_KW);
+        Token procName = LT(1);
         match(TokenType.IDENTIFIER);
-
-        // Los procedimientos pueden tener una lista de parámetros opcional
+        // Register procedure in symbol table
+        symbolTable.addSymbol(new Symbol(procName.text, "procedure", null));
+        symbolTable.enterScope(); // New scope for procedure
         if (LA(1) == TokenType.PAREN_LEFT) {
             match(TokenType.PAREN_LEFT);
             listaParametros();
             match(TokenType.PAREN_RIGHT);
         }
-
-        // Este es el cambio: el cuerpo del procedimiento es opcional
         if (LA(1) == TokenType.IS_KW) {
             match(TokenType.IS_KW);
             declaraciones();
             match(TokenType.BEGIN_KW);
             enunciados();
             match(TokenType.END_KW);
-            // Opcionalmente, se repite el nombre del procedimiento
             if (LA(1) == TokenType.IDENTIFIER) {
                 match(TokenType.IDENTIFIER);
             }
         }
-
         match(TokenType.SEMICOLON);
+        symbolTable.exitScope(); // Exit procedure scope
     }
 
     private void declaracionFuncion() throws SyntaxException {
         match(TokenType.FUNCTION_KW);
-        match(TokenType.IDENTIFIER);
+        Token funcName = LT(1);
+        match(TokenType.IDENTIFIER); // Function name
+        symbolTable.enterScope(); // New scope for function parameters
+        if (LA(1) == TokenType.PAREN_LEFT) {
+            match(TokenType.PAREN_LEFT);
+            listaParametros();
+            match(TokenType.PAREN_RIGHT);
+        }
         match(TokenType.RETURN_KW);
-        match(TokenType.IDENTIFIER);
+        Token returnType = LT(1);
+        match(TokenType.IDENTIFIER); // Return type
+        symbolTable.exitScope(); // Exit parameter scope
+        symbolTable.addSymbol(new Symbol(funcName.text, "function", returnType.text));
+        symbolTable.enterScope(); // New scope for function body
         match(TokenType.IS_KW);
         declaraciones();
         match(TokenType.BEGIN_KW);
         enunciados();
         match(TokenType.END_KW);
-        match(TokenType.IDENTIFIER);
+
+        // Optional function name at the end
+        if (LA(1) == TokenType.IDENTIFIER) {
+            match(TokenType.IDENTIFIER);
+        }
+
         match(TokenType.SEMICOLON);
+        symbolTable.exitScope(); // Exit function body scope
     }
+
 
     private void declaracionBody() throws SyntaxException {
         match(TokenType.BODY_KW);
@@ -1140,3 +1163,4 @@ public class AdaParser {
         match(TokenType.SEMICOLON);
     }
 }
+
