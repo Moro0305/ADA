@@ -610,8 +610,8 @@ public class AdaParser {
         match(TokenType.OF_KW);
         expresionPuntual();
         if (LA(1) == TokenType.ATTRIBUTE_OP) {
-            match(TokenType.ATTRIBUTE_OP);
-            match(TokenType.IDENTIFIER);
+            match(TokenType.ATTRIBUTE_OP); // ATTRIBUTE_OP already encodes attribute name like 'Range
+            // removed extra IDENTIFIER expectation
         }
         match(TokenType.DOUBLE_ARROW);
         expresion();
@@ -635,11 +635,12 @@ public class AdaParser {
             match(TokenType.NEW_KW);
             match(TokenType.IDENTIFIER);
             if (LA(1) == TokenType.ATTRIBUTE_OP) {
-                match(TokenType.ATTRIBUTE_OP);
-                match(TokenType.IDENTIFIER);
+                match(TokenType.ATTRIBUTE_OP); // token text contains attribute name
                 if (LA(1) == TokenType.PAREN_LEFT) {
                     match(TokenType.PAREN_LEFT);
-                    listaParametros();
+                    if (LA(1) != TokenType.PAREN_RIGHT) {
+                        listaExpresiones();
+                    }
                     match(TokenType.PAREN_RIGHT);
                 }
             }
@@ -653,17 +654,19 @@ public class AdaParser {
                     match(TokenType.DOT);
                     match(TokenType.IDENTIFIER);
                 } else if (LA(1) == TokenType.ATTRIBUTE_OP) {
-                    match(TokenType.ATTRIBUTE_OP);
-                    match(TokenType.IDENTIFIER);
-                    if (LA(1) == TokenType.PAREN_LEFT) {
+                    match(TokenType.ATTRIBUTE_OP); // attribute token (e.g. 'Image)
+                    if (LA(1) == TokenType.PAREN_LEFT) { // possible attribute argument list (e.g. Integer'Image(Result))
                         match(TokenType.PAREN_LEFT);
-                        listaParametros();
+                        if (LA(1) != TokenType.PAREN_RIGHT) {
+                            listaExpresiones();
+                        }
                         match(TokenType.PAREN_RIGHT);
                     }
                 } else if (LA(1) == TokenType.PAREN_LEFT) {
-                    // Lógica crucial para la indexación de arreglos y llamadas a funciones
                     match(TokenType.PAREN_LEFT);
-                    listaExpresiones(); // Puede ser un solo índice o una lista
+                    if (LA(1) != TokenType.PAREN_RIGHT) {
+                        listaExpresiones();
+                    }
                     match(TokenType.PAREN_RIGHT);
                 } else {
                     break;
