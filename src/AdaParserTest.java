@@ -26,14 +26,21 @@ public class AdaParserTest {
                 codigoAda = new String(Files.readAllBytes(Paths.get(filePath)));
                 System.out.println("Archivo '" + filePath + "' cargado exitosamente.");
             } catch (IOException e) {
-                System.err.println("Error al leer el archivo. Se usará el código predefinido.");
+                System.err.println("Error al leer el archivo: " + e.getMessage());
+                System.err.println("Se usará el código predefinido.");
                 // If file reading fails, use the hardcoded Ada code
                 codigoAda = getHardcodedAdaCode();
             }
         } else {
-            // If no arguments, use the hardcoded Ada code
-            System.out.println("No se especificó un archivo. Se usará el código predefinido.");
-            codigoAda = getHardcodedAdaCode();
+            // If no arguments, try to load TestComplete.ada by default
+            String defaultFile = "src/TestComplete.ada";
+            try {
+                codigoAda = new String(Files.readAllBytes(Paths.get(defaultFile)));
+                System.out.println("Archivo '" + defaultFile + "' cargado exitosamente.");
+            } catch (IOException e) {
+                System.out.println("No se encontró '" + defaultFile + "'. Se usará el código predefinido.");
+                codigoAda = getHardcodedAdaCode();
+            }
         }
 
         // Lexical Analysis Phase (Lexer)

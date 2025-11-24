@@ -40,16 +40,18 @@ public class SymbolTable {
     }
 
     /**
-     * Adds a symbol to the current scope. Warns if already declared in this scope.
+     * Adds a symbol to the current scope. Throws SyntaxException if already declared in this scope.
      * @param symbol Symbol to add
+     * @throws SyntaxException if the symbol is already declared in the current scope
      */
-    public void addSymbol(Symbol symbol) {
+    public void addSymbol(Symbol symbol) throws SyntaxException {
         if (scopeStack.isEmpty()) {
             enterScope();
         }
         Map<String, Symbol> currentScope = scopeStack.peek();
         if (currentScope.containsKey(symbol.name)) {
-            System.err.println("Semantic Error: Symbol '" + symbol.name + "' already declared in this scope.");
+            throw new SyntaxException("Error Semántico: La variable '" + symbol.name +
+                "' ya fue declarada en este alcance (scope).");
         } else {
             currentScope.put(symbol.name, symbol);
             System.out.println("Added symbol: " + symbol);
@@ -69,5 +71,23 @@ public class SymbolTable {
             }
         }
         return null; // Not found
+    }
+
+    /**
+     * Verifies that a symbol has been declared in the current scope or any parent scope.
+     * Throws SyntaxException if the symbol is not declared.
+     * @param name Identifier name to verify
+     * @param line Line number where the identifier is used (for error reporting)
+     * @param column Column number where the identifier is used (for error reporting)
+     * @throws SyntaxException if the symbol has not been declared
+     */
+    public void verifySymbolDeclared(String name, int line, int column) throws SyntaxException {
+        Symbol symbol = findSymbol(name);
+        if (symbol == null) {
+            throw new SyntaxException("Error Semántico: La variable '" + name +
+                "' se utiliza en la línea " + line + ", columna " + column +
+                " pero no ha sido declarada en este alcance ni en ningún alcance superior.");
+        }
+        System.out.println("Symbol '" + name + "' verified at line " + line + ", column " + column);
     }
 }

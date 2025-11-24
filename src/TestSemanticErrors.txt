@@ -1,0 +1,25 @@
+-- Archivo de prueba para errores semánticos
+-- Este archivo demuestra la detección de variables duplicadas y no declaradas
+
+procedure TestSemanticErrors is
+   X : Integer;
+   Y : Integer;
+   X : Integer;  -- ERROR: X ya fue declarada en este alcance
+
+   function TestFunction(A : Integer) return Integer is
+      A : Integer;  -- ERROR: A ya fue declarada (como parámetro)
+      Result : Integer;
+   begin
+      Result := A + B;  -- ERROR: B no ha sido declarada
+      return Result;
+   end TestFunction;
+
+   Z : Integer;
+begin
+   X := 10;
+   Y := 20;
+   Z := X + Y;
+   W := 30;  -- ERROR: W no ha sido declarada
+   X := TestFunction(5);
+end TestSemanticErrors;
+
