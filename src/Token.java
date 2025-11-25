@@ -1,23 +1,23 @@
 /**
- * Represents a lexical token in Ada source code.
- * Stores the token type, text, and its position (line and column).
+ * Representa un token léxico en código Ada.
+ * Contiene el tipo, texto y la posición (línea y columna).
  */
 public class Token {
-    /** Type of the token (keyword, identifier, literal, operator, etc.) */
+    /** Tipo del token (palabra reservada, identificador, literal, operador, etc.) */
     public final TokenType type;
-    /** Text content of the token */
+    /** Texto del token */
     public final String text;
-    /** Line number where the token appears */
+    /** Línea donde aparece el token */
     public final int line;
-    /** Column number where the token appears */
+    /** Columna donde aparece el token */
     public final int column;
 
     /**
-     * Constructs a Token with the given type, text, line, and column.
-     * @param type TokenType of the token
-     * @param text Text content of the token
-     * @param line Line number
-     * @param column Column number
+     * Construye un Token con tipo, texto, línea y columna.
+     * @param type Tipo del token
+     * @param text Texto del token
+     * @param line Línea donde aparece
+     * @param column Columna donde aparece
      */
     public Token(TokenType type, String text, int line, int column) {
         this.type = type;
@@ -27,7 +27,7 @@ public class Token {
     }
 
     /**
-     * Returns a string representation of the token for debugging.
+     * Representación en cadena para depuración.
      */
     @Override
     public String toString() {

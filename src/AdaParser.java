@@ -1,6 +1,7 @@
 /**
- * AdaParser parses Ada source code tokens and builds the program structure.
- * Supports nested symbol tables for scope management and semantic checks.
+ * Analizador sintáctico para código Ada.
+ * Procesa una lista de tokens y construye la estructura del programa.
+ * Incluye manejo de tabla de símbolos para ámbitos y comprobaciones semánticas básicas.
  */
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,17 +9,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class AdaParser {
-    /** List of tokens to parse */
+    /** Lista de tokens a analizar */
     private ArrayList<Token> tokens;
-    /** Current token index in the token list */
+    /** Índice del token actual en la lista */
     private int tokenIndex = 0;
-    /** Lookahead buffer for predictive parsing */
+    /** Tamaño del buffer de lookahead */
     private static final int LOOKAHEAD_K = 4;
     private final Token[] lookaheadBuffer = new Token[LOOKAHEAD_K];
-    /** Symbol table for managing scopes and declarations */
+    /** Tabla de símbolos para gestión de ámbitos y declaraciones */
     private SymbolTable symbolTable;
 
-    /** Set of predefined identifiers to ignore during semantic checks */
+    /** Identificadores predefinidos que se omiten en comprobaciones semánticas */
     private static final Set<String> PREDEFINED_IDENTIFIERS = new HashSet<>(Arrays.asList(
             // Subprogramas y E/S estándar
             "Put_Line", "Get_Line", "New_Line", "Put", "Get",
@@ -29,13 +30,13 @@ public class AdaParser {
     ));
 
     /**
-     * Constructs an AdaParser with the given tokens.
-     * Initializes the lookahead buffer and symbol table.
-     * @param tokens List of tokens to parse
+     * Construye un AdaParser con la lista de tokens dada.
+     * Inicializa el buffer de lookahead y la tabla de símbolos.
+     * @param tokens Lista de tokens para analizar
      */
     public AdaParser(ArrayList<Token> tokens) {
         this.tokens = tokens;
-        this.symbolTable = new SymbolTable(); // Initialize symbol table
+        this.symbolTable = new SymbolTable(); // Inicializa la tabla de símbolos
         for (int i = 0; i < LOOKAHEAD_K; i++) {
             if (i < tokens.size()) {
                 lookaheadBuffer[i] = tokens.get(i);
@@ -46,9 +47,9 @@ public class AdaParser {
     }
 
     /**
-     * Returns the type of the k-th lookahead token.
-     * @param k Lookahead position (1-based)
-     * @return TokenType of the k-th lookahead token
+     * Devuelve el tipo del k-ésimo token de lookahead.
+     * @param k Posición de lookahead (1-based)
+     * @return TokenType del token en la posición indicada
      */
     public TokenType LA(int k) {
         if (k > LOOKAHEAD_K || tokenIndex + k - 1 >= tokens.size()) {
@@ -58,9 +59,9 @@ public class AdaParser {
     }
 
     /**
-     * Returns the k-th lookahead token.
-     * @param k Lookahead position (1-based)
-     * @return Token object at the k-th lookahead position
+     * Devuelve el k-ésimo token de lookahead.
+     * @param k Posición de lookahead (1-based)
+     * @return Token en la posición indicada
      */
     public Token LT(int k) {
         if (k > LOOKAHEAD_K || tokenIndex + k - 1 >= tokens.size()) {
@@ -70,7 +71,7 @@ public class AdaParser {
     }
 
     /**
-     * Consumes the current token and advances the lookahead buffer.
+     * Consume el token actual y avanza el buffer de lookahead.
      */
     private void consume() {
         tokenIndex++;
@@ -85,20 +86,21 @@ public class AdaParser {
     }
 
     /**
-     * Entry point for parsing. Throws SyntaxException if syntax is invalid.
+     * Punto de entrada del análisis. Lanza SyntaxException si la sintaxis es inválida.
      */
     public void analizar() throws SyntaxException {
         programa();
         if (LA(1) != TokenType.EOF) {
             throw new SyntaxException("Se esperaba el final del archivo, pero se encontró un token inesperado: '" + LT(1).text + "' en la línea " + LT(1).line + ", columna " + LT(1).column);
         }
-        System.out.println("La sintaxis del programa es correcta. ✅");
+        System.out.println("La sintaxis del programa es correcta.");
     }
 
     /**
-     * Matches the expected token type, throws SyntaxException if not matched.
-     * @param expectedType Expected TokenType to match
-     * @throws SyntaxException if the next token does not match expectedType
+     * Verifica que el token actual coincida con el tipo esperado.
+     * Lanza SyntaxException si no coincide.
+     * @param expectedType Tipo de token esperado
+     * @throws SyntaxException si el token siguiente no coincide
      */
     private void match(TokenType expectedType) throws SyntaxException {
         if (LA(1) != expectedType) {
@@ -398,7 +400,7 @@ public class AdaParser {
 
         Token typeName = LT(1);
         match(TokenType.IDENTIFIER);
-        // Register variable in symbol table
+        // Registra la variable en la tabla de símbolos
         symbolTable.addSymbol(new Symbol(varName.text, "variable", typeName.text));
 
         if (LA(1) == TokenType.AT_KW) {
@@ -408,13 +410,13 @@ public class AdaParser {
 
         if (LA(1) == TokenType.ASSIGNMENT_OP) {
             match(TokenType.ASSIGNMENT_OP);
-            // The key change: The initializer can be a list of expressions in parentheses.
+            // El iniciador puede ser una lista de expresiones entre paréntesis
             if (LA(1) == TokenType.PAREN_LEFT) {
                 match(TokenType.PAREN_LEFT);
-                listaExpresiones(); // Handles the comma-separated list
+                listaExpresiones(); // Maneja la lista separada por comas
                 match(TokenType.PAREN_RIGHT);
             } else {
-                // Or it can be a single expression
+                // O puede ser una sola expresión
                 expresion();
             }
         }
@@ -650,8 +652,8 @@ public class AdaParser {
         match(TokenType.OF_KW);
         expresionPuntual();
         if (LA(1) == TokenType.ATTRIBUTE_OP) {
-            match(TokenType.ATTRIBUTE_OP); // ATTRIBUTE_OP already encodes attribute name like 'Range
-            // removed extra IDENTIFIER expectation
+            match(TokenType.ATTRIBUTE_OP); // token de atributo (ej. 'Image)
+            // se elimina la expectativa adicional de IDENTIFIER
         }
         match(TokenType.DOUBLE_ARROW);
         expresion();
@@ -675,7 +677,7 @@ public class AdaParser {
             match(TokenType.NEW_KW);
             match(TokenType.IDENTIFIER);
             if (LA(1) == TokenType.ATTRIBUTE_OP) {
-                match(TokenType.ATTRIBUTE_OP); // token text contains attribute name
+                match(TokenType.ATTRIBUTE_OP); // token de atributo (ej. 'Image)
                 if (LA(1) == TokenType.PAREN_LEFT) {
                     match(TokenType.PAREN_LEFT);
                     if (LA(1) != TokenType.PAREN_RIGHT) {
@@ -700,8 +702,8 @@ public class AdaParser {
                     match(TokenType.DOT);
                     match(TokenType.IDENTIFIER);
                 } else if (LA(1) == TokenType.ATTRIBUTE_OP) {
-                    match(TokenType.ATTRIBUTE_OP); // attribute token (e.g. 'Image)
-                    if (LA(1) == TokenType.PAREN_LEFT) { // possible attribute argument list (e.g. Integer'Image(Result))
+                    match(TokenType.ATTRIBUTE_OP); // token de atributo (ej. 'Image)
+                    if (LA(1) == TokenType.PAREN_LEFT) { // posible lista de argumentos de atributo (ej. Integer'Image(Result))
                         match(TokenType.PAREN_LEFT);
                         if (LA(1) != TokenType.PAREN_RIGHT) {
                             listaExpresiones();
@@ -762,7 +764,7 @@ public class AdaParser {
 
     private void sentenciaRequeue() throws SyntaxException {
         match(TokenType.REQUEUE_KW);
-        // Call an entry
+        // Llamada a una entrada (entry)
         match(TokenType.IDENTIFIER);
         match(TokenType.DOT);
         match(TokenType.IDENTIFIER);
@@ -771,7 +773,7 @@ public class AdaParser {
             listaExpresiones();
             match(TokenType.PAREN_RIGHT);
         }
-        // Optionally with 'with abort'
+        // Opcionalmente con 'with abort'
         if (LA(1) == TokenType.WITH_KW) {
             match(TokenType.WITH_KW);
             match(TokenType.ABORT_KW);
@@ -991,9 +993,9 @@ public class AdaParser {
         match(TokenType.PROCEDURE_KW);
         Token procName = LT(1);
         match(TokenType.IDENTIFIER);
-        // Register procedure in symbol table BEFORE entering the new scope
+        // Registra el procedimiento en la tabla de símbolos antes de entrar al nuevo ámbito
         symbolTable.addSymbol(new Symbol(procName.text, "procedure", null));
-        symbolTable.enterScope(); // New scope for procedure
+        symbolTable.enterScope(); // Nuevo ámbito para el procedimiento
         if (LA(1) == TokenType.PAREN_LEFT) {
             match(TokenType.PAREN_LEFT);
             listaParametros();
@@ -1010,7 +1012,7 @@ public class AdaParser {
             }
         }
         match(TokenType.SEMICOLON);
-        symbolTable.exitScope(); // Exit procedure
+        symbolTable.exitScope(); // Salir del ámbito del procedimiento
     }
 
     private void declaracionFuncion() throws SyntaxException {
@@ -1080,42 +1082,42 @@ public class AdaParser {
     }
 
     private void declaracionBody() throws SyntaxException {
-        // Placeholder for body declaration parsing
+        // Pendiente: análisis de declaraciones de cuerpo (no implementado)
         throw new SyntaxException("Parsing for body declarations is not yet implemented.");
     }
 
     private void declaracionProtegida() throws SyntaxException {
-        // Placeholder for protected declaration parsing
+        // Pendiente: análisis de declaraciones protegidas (no implementado)
         throw new SyntaxException("Parsing for protected declarations is not yet implemented.");
     }
 
     private void declaracionRecord() throws SyntaxException {
-        // Placeholder for record declaration parsing
+        // Pendiente: análisis de declaraciones de record (no implementado)
         throw new SyntaxException("Parsing for record declarations is not yet implemented.");
     }
 
     private void declaracionTask() throws SyntaxException {
-        // Placeholder for task declaration parsing
+        // Pendiente: análisis de declaraciones de task (no implementado)
         throw new SyntaxException("Parsing for task declarations is not yet implemented.");
     }
 
     private void declaracionSubtype() throws SyntaxException {
-        // Placeholder for subtype declaration parsing
+        // Pendiente: análisis de declaraciones de subtype (no implementado)
         throw new SyntaxException("Parsing for subtype declarations is not yet implemented.");
     }
 
     private void declaracionTipo() throws SyntaxException {
-        // Placeholder for type declaration parsing
+        // Pendiente: análisis de declaraciones de tipo (no implementado)
         throw new SyntaxException("Parsing for type declarations is not yet implemented.");
     }
 
     private void directivaPragma() throws SyntaxException {
-        // Placeholder for pragma directive parsing
+        // Pendiente: análisis de directivas pragma (no implementado)
         throw new SyntaxException("Parsing for pragma directives is not yet implemented.");
     }
 
     private void condicion() throws SyntaxException {
-        // Placeholder for condition parsing
+        // Pendiente: análisis de condiciones (delegado a expresion)
         expresion();
     }
 }

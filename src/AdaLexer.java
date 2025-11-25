@@ -1,30 +1,28 @@
 /**
- * AdaLexer is a lexical analyzer for Ada source code.
- * It tokenizes the input string and provides utilities for parsing Ada syntax.
- * Extends the base Lexer class and adds Ada-specific logic.
+ * Analizador léxico (lexer) para código Ada.
+ * Tokeniza la entrada y ofrece utilidades específicas para el análisis sintáctico.
  */
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Arrays;
 
 public class AdaLexer extends Lexer {
-    /** Input string to tokenize */
+    /** Cadena de entrada a tokenizar */
     protected String input;
-    /** Current position in the input string */
+    /** Posición actual en la entrada */
     protected int position = 0;
-    /** Current character being analyzed */
+    /** Carácter actual en análisis */
     protected char c;
-    /** End-of-file character constant */
+    /** Constante que representa fin de archivo */
     protected final char EOF = (char)-1;
-    /** Current line number for error reporting */
+    /** Número de línea actual para reportes */
     protected int line = 1;
-    /** Current column number for error reporting */
+    /** Número de columna actual para reportes */
     protected int column = 1;
 
     /**
-     * Constructs an AdaLexer with the given input string.
-     * Initializes the current character and position.
-     * @param input Ada source code to tokenize
+     * Construye un AdaLexer con la entrada dada.
+     * @param input Código Ada a tokenizar
      */
     public AdaLexer(String input) {
         super(input);
@@ -36,22 +34,22 @@ public class AdaLexer extends Lexer {
         }
     }
 
-    /** Returns true if the current character is a letter. */
+    /** Devuelve true si el carácter actual es una letra. */
     private boolean isLetter() {
         return Character.isLetter(c);
     }
 
-    /** Returns true if the current character is a digit. */
+    /** Devuelve true si el carácter actual es un dígito. */
     private boolean isDigit() {
         return Character.isDigit(c);
     }
 
-    /** Returns true if the current character is whitespace. */
+    /** Devuelve true si el carácter actual es un espacio en blanco. */
     private boolean isWhitespace() {
         return Character.isWhitespace(c);
     }
 
-    /** Peeks at the next character in the input without consuming it. */
+    /** Devuelve el siguiente carácter sin consumirlo. */
     private char peek() {
         if (position + 1 >= input.length()) {
             return EOF;
@@ -59,19 +57,19 @@ public class AdaLexer extends Lexer {
         return input.charAt(position + 1);
     }
 
-    /** Returns true if the end of input has been reached. */
+    /** Devuelve true si se alcanzó el final de la entrada. */
     private boolean isEOF() {
         return position >= input.length();
     }
 
-    /** Consumes whitespace characters. */
+    /** Consume caracteres de espacio en blanco. */
     private void ws() {
         while (isWhitespace()) {
             consume();
         }
     }
 
-    /** Consumes Ada-style comments (starting with --). */
+    /** Consume Ada-style comments (starting with --). */
     private void comment() {
         if (c == '-') {
             consume();
@@ -262,8 +260,10 @@ public class AdaLexer extends Lexer {
         return new Token(TokenType.STRING_LITERAL, buf.toString(), startLine, startColumn);
     }
 
-    // Este método ya existe en la superclase, no es necesario redefinirlo
-    // y si se hace, debe ser 'public'
+    /**
+     * Consume el carácter actual y actualiza línea y columna.
+     * Mantiene la lógica específica de AdaLexer para seguimiento de posición.
+     */
     public void consume() {
         if (c == '\n') {
             line++;

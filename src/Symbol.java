@@ -1,20 +1,20 @@
 /**
- * Represents an identifier in Ada code, such as a variable, function, procedure, or type.
- * Stores the name, category, and type information for semantic analysis.
+ * Representa un identificador en código Ada, como variable, función, procedimiento o tipo.
+ * Contiene nombre, categoría y tipo para el análisis semántico.
  */
 public class Symbol {
-    /** Identifier name (e.g., variable, function, procedure) */
+    /** Nombre del identificador (ej., variable, función, procedimiento) */
     String name;
-    /** Category of the symbol (e.g., "variable", "procedure", "function", "type") */
+    /** Categoría del símbolo (ej., "variable", "procedure", "function", "type") */
     String category;
-    /** Data type or return type (e.g., "Integer", "Boolean", or custom type name) */
+    /** Tipo de dato o tipo de retorno (ej., "Integer", "Boolean" o nombre de tipo) */
     String type;
 
     /**
-     * Constructs a Symbol with the given name, category, and type.
-     * @param name Identifier name
-     * @param category Symbol category
-     * @param type Data type or return type
+     * Construye un Symbol con nombre, categoría y tipo.
+     * @param name Nombre del identificador
+     * @param category Categoría del símbolo
+     * @param type Tipo de dato o retorno
      */
     public Symbol(String name, String category, String type) {
         this.name = name;
@@ -23,7 +23,7 @@ public class Symbol {
     }
 
     /**
-     * Returns a string representation of the symbol for debugging.
+     * Representación en cadena para depuración.
      */
     @Override
     public String toString() {

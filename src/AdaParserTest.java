@@ -1,7 +1,7 @@
 /**
- * Test class for AdaParser.
- * Demonstrates lexical and syntactic analysis of Ada source code.
- * Prints generated tokens and validates syntax using AdaParser.
+ * Clase de prueba para AdaParser.
+ * Demuestra el análisis léxico y sintáctico de código Ada.
+ * Muestra los tokens generados y valida la sintaxis con AdaParser.
  */
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,10 +10,10 @@ import java.util.ArrayList;
 
 public class AdaParserTest {
     /**
-     * Main method to run the AdaParser test.
-     * Loads Ada code from a file or uses a hardcoded example, tokenizes it, and parses it.
-     * Prints all tokens and reports syntax errors if found.
-     * @param args Command-line arguments (optional: path to Ada source file)
+     * Método principal para ejecutar la prueba de AdaParser.
+     * Carga código Ada desde un archivo o usa un ejemplo incorporado, lo tokeniza y lo parsea.
+     * Imprime los tokens y reporta errores de sintaxis si se encuentran.
+     * @param args Argumentos de línea de comandos (opcional: ruta al archivo Ada)
      */
     public static void main(String[] args) {
         String codigoAda;
@@ -70,8 +70,8 @@ public class AdaParserTest {
     }
 
     /**
-     * Returns a hardcoded Ada program for testing purposes.
-     * @return Example Ada source code as a string
+     * Devuelve un programa Ada embebido usado para pruebas.
+     * @return Código Ada de ejemplo como cadena
      */
     private static String getHardcodedAdaCode() {
         return

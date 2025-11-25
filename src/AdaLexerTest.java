@@ -44,9 +44,9 @@ public class AdaLexerTest {
         AdaLexer lexer = new AdaLexer(codigoAda);
         Token t = lexer.nextToken();
         while (t.type != TokenType.EOF) {
-            System.out.println(t); // Print each token
+            System.out.println(t); // Imprime cada token
             t = lexer.nextToken();
         }
-        System.out.println(t); // Print the EOF token
+        System.out.println(t); // Imprime el token EOF
     }
 }

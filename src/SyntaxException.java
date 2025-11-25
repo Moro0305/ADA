@@ -1,11 +1,11 @@
 /**
- * Exception thrown when a syntax error is detected during Ada parsing.
- * Used to signal and describe parsing errors with context information.
+ * Excepción lanzada cuando se detecta un error de sintaxis durante el análisis.
+ * Contiene un mensaje descriptivo del error para reporte.
  */
 public class SyntaxException extends Exception {
     /**
-     * Constructs a SyntaxException with a detailed error message.
-     * @param message Description of the syntax error
+     * Construye la excepción con un mensaje detallado del error.
+     * @param message Descripción del error de sintaxis
      */
     public SyntaxException(String message) {
         super(message);

@@ -1,22 +1,20 @@
 /**
- * Abstract base class for lexical analyzers (lexers).
- * Provides basic input handling and character consumption logic.
- * Subclasses must implement nextToken() to return the next token from input.
+ * Clase base abstracta para analizadores léxicos.
+ * Proporciona manejo básico de entrada y consumo de caracteres.
  */
 public abstract class Lexer {
-    /** End-of-file character constant */
+    /** Carácter que representa fin de archivo */
     public static final char EOF = (char) -1;
-    /** Input string to tokenize */
+    /** Cadena de entrada a tokenizar */
     protected String input;
-    /** Current position in the input string */
+    /** Posición actual en la cadena de entrada */
     protected int p = 0;
-    /** Current character being analyzed */
+    /** Carácter actual en análisis */
     protected char c;
 
     /**
-     * Constructs a Lexer with the given input string.
-     * Initializes the current character and position.
-     * @param input Source code to tokenize
+     * Construye un Lexer con la cadena de entrada dada.
+     * @param input Código fuente a tokenizar
      */
     public Lexer(String input) {
         this.input = input;
@@ -24,7 +22,7 @@ public abstract class Lexer {
     }
 
     /**
-     * Consumes the current character and advances the position.
+     * Consume el carácter actual y avanza la posición.
      */
     public void consume() {
         p++;
@@ -36,9 +34,9 @@ public abstract class Lexer {
     }
 
     /**
-     * Returns the next token from the input.
-     * Must be implemented by subclasses.
-     * @return The next Token object
+     * Retorna el siguiente token de la entrada.
+     * Debe ser implementado por subclases.
+     * @return Siguiente Token
      */
     public abstract Token nextToken();
 }

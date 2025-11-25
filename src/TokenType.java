@@ -1,6 +1,6 @@
 /**
- * Enum representing all possible token types in Ada source code.
- * Includes keywords, literals, operators, delimiters, and special types for parsing.
+ * Enumeración de los tipos de token posibles en código Ada.
+ * Incluye palabras reservadas, literales, operadores, delimitadores y tokens especiales.
  */
 public enum TokenType {
     // Special tokens
